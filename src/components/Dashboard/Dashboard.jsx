@@ -134,7 +134,7 @@ function Dashboard() {
                 {employees.map((employee) => (
                   <tr key={employee._id}>
                     <td>{employee.firstName} {employee.lastName}</td>
-                    <td>{employee.position || employee.highestQualification || '-'}</td>
+                    <td>{employee.position || '-'}</td>
                     <td>
                       <span className={`status-chip status-${(employee.status || 'Pending').toLowerCase()}`}>
                         {employee.status || 'Pending'}
@@ -202,7 +202,7 @@ function Dashboard() {
               </div>
               <div className="form-group">
                 <label className="form-label">Position</label>
-                <div>{selectedEmployee.position || selectedEmployee.highestQualification || '-'}</div>
+                <div>{selectedEmployee.position || '-'}</div>
               </div>
               <div className="form-group">
                 <label className="form-label">Status</label>

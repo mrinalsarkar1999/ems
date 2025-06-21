@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import connectDB from './db.js';
@@ -8,13 +11,19 @@ import fs from 'fs';
 
 const app = express();
 
-// AWS S3 configuration (hardcoded)
+// Check for required environment variables
+if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.S3_BUCKET) {
+  console.error('Required AWS environment variables are not set');
+  process.exit(1);
+}
+
+// AWS S3 configuration from environment variables
 const s3 = new AWS.S3({
-  accessKeyId: 'AKIAXTORPV237ISQBO4A',
-  secretAccessKey: '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',
-  region: 'us-east-1',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
 });
-const S3_BUCKET = 'ssonboardingfiles';
+const S3_BUCKET = process.env.S3_BUCKET;
 
 // Multer setup for file uploads
 const upload = multer({ dest: 'uploads/' });
@@ -88,7 +97,7 @@ app.get('/api/getemployees', async (req, res) => {
   }
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 

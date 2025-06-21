@@ -21,6 +21,7 @@ const EmployeeSchema = new mongoose.Schema({
   pincode: { type: String },
   experience: { type: String },
   currentSalary: { type: Number },
+  position: { type: String },
   uanNumber: { type: String },
   esiNumber: { type: String },
   aadharNumber: { type: String },

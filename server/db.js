@@ -1,6 +1,14 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import mongoose from 'mongoose';
 
-const MONGO_URI = "mongodb+srv://mrinal0g:Kannamma121@nodeapi.llb5wjp.mongodb.net/?retryWrites=true&w=majority&appName=NodeAPI"; // IMPORTANT: Replace with your actual MongoDB connection string
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error('MONGO_URI environment variable is not set');
+  process.exit(1);
+}
 
 const connectDB = async () => {
   try {

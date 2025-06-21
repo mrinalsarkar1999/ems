@@ -37,6 +37,7 @@ const initialFormData = {
   emergencyContact: [{ name: '', relationship: '', phone: '' }],
   experienceTotalYears: '',
   currentSalary: '',
+  position: '',
   pfUanNumber: '',
   esiNumber: '',
   aadharNumber: '',
@@ -570,6 +571,18 @@ function Onboarding() {
                 className={`form-input ${errors.currentSalary ? 'error' : ''}`}
               />
               {/* {errors.currentSalary && <div className="error-message">{errors.currentSalary}</div>} */}
+            </div>
+            <div className="form-group">
+              <label className="form-label">Position</label>
+              <input
+                type="text"
+                name="position"
+                value={formData.position}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
+                className={`form-input ${errors.position ? 'error' : ''}`}
+              />
+              {/* {errors.position && <div className="error-message">{errors.position}</div>} */}
             </div>
             <div className="form-group">
               <label className="form-label"> UAN Number</label>
