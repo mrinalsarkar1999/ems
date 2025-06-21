@@ -1,111 +1,160 @@
-import React, { useState } from 'react';
-import './Onboarding.css';
+import React, { useState } from "react";
+import "./Onboarding.css";
 
 const steps = [
-  'Personal Information',
-  'Contact Details',
-  'Employment Details',
-  'Banking Information',
-  'Documents Upload',
+  "Personal Information",
+  "Contact Details",
+  "Employment Details",
+  "Banking Information",
+  "Documents Upload",
 ];
 
 const initialFormData = {
-  firstName: '',
-  lastName: '',
-  dobAsPerCertificate: '',
-  dobAsPerCelebration: '',
-  gender: '',
-  nationality: '',
-  maritalStatus: '',
-  bloodGroup: '',
-  fatherName: '',
-  fatherAge: '',
-  motherName: '',
-  motherAge: '',
-  highestQualification: '',
-  spouseName: '',
-  spouseDateOfBirth: '',
-  weddingDate: '',
-  spouseEmail: '',
-  email: '',
-  phone: '',
-  address: '',
-  city: '',
-  state: '',
-  postalCode: '',
-  country: '',
-  emergencyContact: [{ name: '', relationship: '', phone: '' }],
-  experienceTotalYears: '',
-  currentSalary: '',
-  position: '',
-  pfUanNumber: '',
-  esiNumber: '',
-  aadharNumber: '',
-  namesAsOnAadhar: '',
-  panNumber: '',
-  namesAsOnPan: '',
-  bankAccountNumber: '',
-  namesAsPerBankDetails: '',
-  bankName: '',
-  branchName: '',
-  ifscCode: '',
+  firstName: "",
+  lastName: "",
+  dobAsPerCertificate: "",
+  dobAsPerCelebration: "",
+  gender: "",
+  nationality: "",
+  maritalStatus: "",
+  bloodGroup: "",
+  fatherName: "",
+  fatherAge: "",
+  motherName: "",
+  motherAge: "",
+  highestQualification: "",
+  spouseName: "",
+  spouseDateOfBirth: "",
+  weddingDate: "",
+  spouseEmail: "",
+  email: "",
+  phone: "",
+  address: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "",
+  emergencyContact: [{ name: "", relationship: "", phone: "" }],
+  experienceTotalYears: "",
+  currentSalary: "",
+  position: "",
+  pfUanNumber: "",
+  esiNumber: "",
+  aadharNumber: "",
+  namesAsOnAadhar: "",
+  panNumber: "",
+  namesAsOnPan: "",
+  bankAccountNumber: "",
+  namesAsPerBankDetails: "",
+  bankName: "",
+  branchName: "",
+  ifscCode: "",
   documents: [
-    { type: 'HAR', file: null, url: undefined, key: undefined },
-    { type: 'Resume', file: null, url: undefined, key: undefined },
-    { type: 'Last Appointment Letter', file: null, url: undefined, key: undefined },
-    { type: 'Last Payslip', file: null, url: undefined, key: undefined },
-    { type: 'Last 6 months Bank Statement', file: null, url: undefined, key: undefined },
-    { type: 'All Experience Letters', file: null, url: undefined, key: undefined },
-    { type: 'SSC Certificate', file: null, url: undefined, key: undefined },
-    { type: 'Intermediate Certificate', file: null, url: undefined, key: undefined },
-    { type: 'Degree Certificate', file: null, url: undefined, key: undefined },
-    { type: 'Post Graduate Certificate', file: null, url: undefined, key: undefined },
-    { type: 'Any other Certifications/ Diplomas', file: null, url: undefined, key: undefined },
-    { type: 'PAN Card - Scan Copy', file: null, url: undefined, key: undefined },
-    { type: 'Aadhar Card - Scan Copy', file: null, url: undefined, key: undefined },
-    { type: 'BankPass Book - 1stPage Scan Copy', file: null, url: undefined, key: undefined },
-    { type: 'Latest Passport Photo - Scan Copy', file: null, url: undefined, key: undefined },
+    { type: "HAR", file: null, url: undefined, key: undefined },
+    { type: "Resume", file: null, url: undefined, key: undefined },
+    {
+      type: "Last Appointment Letter",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    { type: "Last Payslip", file: null, url: undefined, key: undefined },
+    {
+      type: "Last 6 months Bank Statement",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    {
+      type: "All Experience Letters",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    { type: "SSC Certificate", file: null, url: undefined, key: undefined },
+    {
+      type: "Intermediate Certificate",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    { type: "Degree Certificate", file: null, url: undefined, key: undefined },
+    {
+      type: "Post Graduate Certificate",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    {
+      type: "Any other Certifications/ Diplomas",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    {
+      type: "PAN Card - Scan Copy",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    {
+      type: "Aadhar Card - Scan Copy",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    {
+      type: "BankPass Book - 1stPage Scan Copy",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
+    {
+      type: "Latest Passport Photo - Scan Copy",
+      file: null,
+      url: undefined,
+      key: undefined,
+    },
   ],
 };
 
 const educationOptions = [
-  'High School',
-  'Associate\'s Degree',
-  'Bachelor\'s Degree',
-  'Master\'s Degree',
-  'Doctorate',
-  'Other'
+  "High School",
+  "Associate's Degree",
+  "Bachelor's Degree",
+  "Master's Degree",
+  "Doctorate",
+  "Other",
 ];
 
 function Onboarding() {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
-  const [filteredEducationOptions, setFilteredEducationOptions] = useState(educationOptions);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredEducationOptions, setFilteredEducationOptions] =
+    useState(educationOptions);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedBloodGroup, setSelectedBloodGroup] = useState('');
+  const [selectedBloodGroup, setSelectedBloodGroup] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const bloodGroups = [
-    'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
-  ];
+  const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
-  const filteredBloodGroups = bloodGroups.filter(group =>
+  const filteredBloodGroups = bloodGroups.filter((group) =>
     group.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleBloodGroupSelect = (group) => {
-    setFormData(prev => ({ ...prev, bloodGroup: group }));
+    setFormData((prev) => ({ ...prev, bloodGroup: group }));
     setSelectedBloodGroup(group);
     setSearchTerm(group);
     setShowDropdown(false);
   };
 
   const handleNext = () => {
-      setActiveStep((prevStep) => prevStep + 1);
+    setActiveStep((prevStep) => prevStep + 1);
   };
 
   const handleBack = () => {
@@ -119,20 +168,20 @@ function Onboarding() {
       ...prev,
       [name]: newValue,
     }));
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: "",
     }));
   };
 
   const handleSelectChange = (name) => (event) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: event.target.value
+      [name]: event.target.value,
     }));
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: "",
     }));
   };
 
@@ -151,7 +200,10 @@ function Onboarding() {
   const addEmergencyContact = () => {
     setFormData((prev) => ({
       ...prev,
-      emergencyContact: [...prev.emergencyContact, { name: '', relationship: '', phone: '' }],
+      emergencyContact: [
+        ...prev.emergencyContact,
+        { name: "", relationship: "", phone: "" },
+      ],
     }));
   };
 
@@ -165,75 +217,85 @@ function Onboarding() {
   const handleDocumentUpload = async (e, index) => {
     const file = e.target.files?.[0] || null;
     if (!file) return;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       documents: prev.documents.map((doc, i) =>
         i === index ? { ...doc, uploading: true } : doc
-      )
+      ),
     }));
     const formDataToSend = new FormData();
-    formDataToSend.append('file', file);
+    formDataToSend.append("file", file);
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
         body: formDataToSend,
       });
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) throw new Error("Upload failed");
       const data = await response.json();
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         documents: prev.documents.map((doc, i) =>
-          i === index ? { ...doc, url: data.url, key: data.key, file: null, uploading: false } : doc
-        )
+          i === index
+            ? {
+                ...doc,
+                url: data.url,
+                key: data.key,
+                file: null,
+                uploading: false,
+              }
+            : doc
+        ),
       }));
     } catch (err) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         documents: prev.documents.map((doc, i) =>
           i === index ? { ...doc, uploading: false } : doc
-        )
+        ),
       }));
-      alert('Failed to upload file. Please try again.');
+      alert("Failed to upload file. Please try again.");
     }
   };
 
   const handleDocumentRemove = async (index) => {
     const doc = formData.documents[index];
     if (doc.url && doc.key) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         documents: prev.documents.map((d, i) =>
           i === index ? { ...d, deleting: true } : d
-        )
+        ),
       }));
       try {
-        const response = await fetch('http://localhost:5000/api/upload', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("http://localhost:5000/api/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ key: doc.key }),
         });
-        if (!response.ok) throw new Error('Delete failed');
-        setFormData(prev => ({
+        if (!response.ok) throw new Error("Delete failed");
+        setFormData((prev) => ({
           ...prev,
           documents: prev.documents.map((d, i) =>
-            i === index ? { ...d, url: undefined, key: undefined, deleting: false } : d
-          )
+            i === index
+              ? { ...d, url: undefined, key: undefined, deleting: false }
+              : d
+          ),
         }));
       } catch (err) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           documents: prev.documents.map((d, i) =>
             i === index ? { ...d, deleting: false } : d
-          )
+          ),
         }));
-        alert('Failed to delete file from S3. Please try again.');
+        alert("Failed to delete file from S3. Please try again.");
       }
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         documents: prev.documents.map((d, i) =>
           i === index ? { ...d, file: null } : d
-        )
+        ),
       }));
     }
   };
@@ -253,28 +315,41 @@ function Onboarding() {
       }
       // Only include documents with a url (uploaded)
       dataToSubmit.documents = documents
-        .filter(doc => doc.url)
-        .map(doc => ({ type: doc.type, url: doc.url, key: doc.key }));
+        .filter((doc) => doc.url)
+        .map((doc) => ({ type: doc.type, url: doc.url, key: doc.key }));
 
-      const response = await fetch('http://localhost:5000/api/employees', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/employees", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(dataToSubmit),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Something went wrong');
+        // Extract the specific error message from the server response
+        const errorMessage = result.error || "Something went wrong while submitting the form";
+        throw new Error(errorMessage);
       }
 
-      const result = await response.json();
-      console.log('Form submission successful:', result);
+      console.log("Form submission successful:", result);
       setSubmitSuccess(true);
       setFormData(initialFormData);
     } catch (error) {
-      console.error('Form submission error:', error);
-      setSubmitError(error.message);
+      console.error("Form submission error:", error);
+      
+      // Handle different types of errors
+      let errorMessage = "Something went wrong while submitting the form";
+      
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
+        errorMessage = "Network error: Unable to connect to the server. Please check your internet connection and try again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setSubmitError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -295,7 +370,7 @@ function Onboarding() {
                 value={formData.firstName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.firstName ? 'error' : ''}`}
+                className={`form-input ${errors.firstName ? "error" : ""}`}
               />
               {/* {errors.firstName && <div className="error-message">{errors.firstName}</div>} */}
             </div>
@@ -307,7 +382,7 @@ function Onboarding() {
                 value={formData.lastName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.lastName ? 'error' : ''}`}
+                className={`form-input ${errors.lastName ? "error" : ""}`}
               />
               {/* {errors.lastName && <div className="error-message">{errors.lastName}</div>} */}
             </div>
@@ -319,7 +394,7 @@ function Onboarding() {
                 value={formData.fatherName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.fatherName ? 'error' : ''}`}
+                className={`form-input ${errors.fatherName ? "error" : ""}`}
               />
               {/* {errors.fatherName && <div className="error-message">{errors.fatherName}</div>} */}
             </div>
@@ -331,18 +406,22 @@ function Onboarding() {
                 value={formData.motherName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.motherName ? 'error' : ''}`}
+                className={`form-input ${errors.motherName ? "error" : ""}`}
               />
               {/* {errors.motherName && <div className="error-message">{errors.motherName}</div>} */}
             </div>
             <div className="form-group">
-              <label className="form-label">Education (Highest Qualification)</label>
+              <label className="form-label">
+                Education (Highest Qualification)
+              </label>
               <select
                 name="highestQualification"
                 value={formData.highestQualification}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.highestQualification ? 'error' : ''}`}
+                className={`form-input ${
+                  errors.highestQualification ? "error" : ""
+                }`}
               >
                 <option value="">Select Highest Qualification</option>
                 <option value="High School">High School</option>
@@ -355,26 +434,34 @@ function Onboarding() {
               {/* {errors.highestQualification && <div className="error-message">{errors.highestQualification}</div>} */}
             </div>
             <div className="form-group">
-              <label className="form-label">Date of Birth (As per Certificate)</label>
+              <label className="form-label">
+                Date of Birth (As per Certificate)
+              </label>
               <input
                 type="date"
                 name="dobAsPerCertificate"
                 value={formData.dobAsPerCertificate}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.dobAsPerCertificate ? 'error' : ''}`}
+                className={`form-input ${
+                  errors.dobAsPerCertificate ? "error" : ""
+                }`}
               />
               {/* {errors.dobAsPerCertificate && <div className="error-message">{errors.dobAsPerCertificate}</div>} */}
             </div>
             <div className="form-group">
-              <label className="form-label">Date of Birth (As per Celebration)</label>
+              <label className="form-label">
+                Date of Birth (As per Celebration)
+              </label>
               <input
                 type="date"
                 name="dobAsPerCelebration"
                 value={formData.dobAsPerCelebration}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.dobAsPerCelebration ? 'error' : ''}`}
+                className={`form-input ${
+                  errors.dobAsPerCelebration ? "error" : ""
+                }`}
               />
               {/* {errors.dobAsPerCelebration && <div className="error-message">{errors.dobAsPerCelebration}</div>} */}
             </div>
@@ -385,7 +472,7 @@ function Onboarding() {
                 value={formData.maritalStatus}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.maritalStatus ? 'error' : ''}`}
+                className={`form-input ${errors.maritalStatus ? "error" : ""}`}
               >
                 <option value="">Select</option>
                 <option value="Married">Yes</option>
@@ -393,7 +480,7 @@ function Onboarding() {
               </select>
               {/* {errors.maritalStatus && <div className="error-message">{errors.maritalStatus}</div>} */}
             </div>
-            {formData.maritalStatus === 'Married' && (
+            {formData.maritalStatus === "Married" && (
               <>
                 <div className="form-group">
                   <label className="form-label">Spouse's Name</label>
@@ -403,7 +490,7 @@ function Onboarding() {
                     value={formData.spouseName}
                     onChange={handleInputChange}
                     onBlur={handleBlur}
-                    className={`form-input ${errors.spouseName ? 'error' : ''}`}
+                    className={`form-input ${errors.spouseName ? "error" : ""}`}
                   />
                   {/* {errors.spouseName && <div className="error-message">{errors.spouseName}</div>} */}
                 </div>
@@ -415,7 +502,9 @@ function Onboarding() {
                     value={formData.spouseDateOfBirth}
                     onChange={handleInputChange}
                     onBlur={handleBlur}
-                    className={`form-input ${errors.spouseDateOfBirth ? 'error' : ''}`}
+                    className={`form-input ${
+                      errors.spouseDateOfBirth ? "error" : ""
+                    }`}
                   />
                   {/* {errors.spouseDateOfBirth && <div className="error-message">{errors.spouseDateOfBirth}</div>} */}
                 </div>
@@ -427,7 +516,9 @@ function Onboarding() {
                     value={formData.spouseEmail}
                     onChange={handleInputChange}
                     onBlur={handleBlur}
-                    className={`form-input ${errors.spouseEmail ? 'error' : ''}`}
+                    className={`form-input ${
+                      errors.spouseEmail ? "error" : ""
+                    }`}
                   />
                   {/* {errors.spouseEmail && <div className="error-message">{errors.spouseEmail}</div>} */}
                 </div>
@@ -444,7 +535,7 @@ function Onboarding() {
                     setShowDropdown(true);
                   }}
                   onFocus={() => setShowDropdown(true)}
-                  className={`form-input ${errors.bloodGroup ? 'error' : ''}`}
+                  className={`form-input ${errors.bloodGroup ? "error" : ""}`}
                 />
                 {showDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
@@ -459,7 +550,9 @@ function Onboarding() {
                         </div>
                       ))
                     ) : (
-                      <div className="px-4 py-2 text-gray-500 text-sm">No blood groups found</div>
+                      <div className="px-4 py-2 text-gray-500 text-sm">
+                        No blood groups found
+                      </div>
                     )}
                   </div>
                 )}
@@ -479,7 +572,7 @@ function Onboarding() {
                 value={formData.email}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.email ? 'error' : ''}`}
+                className={`form-input ${errors.email ? "error" : ""}`}
               />
               {/* {errors.email && <div className="error-message">{errors.email}</div>} */}
             </div>
@@ -491,7 +584,7 @@ function Onboarding() {
                 value={formData.phone}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.phone ? 'error' : ''}`}
+                className={`form-input ${errors.phone ? "error" : ""}`}
               />
               {/* {errors.phone && <div className="error-message">{errors.phone}</div>} */}
             </div>
@@ -503,7 +596,7 @@ function Onboarding() {
                 value={formData.address}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.address ? 'error' : ''}`}
+                className={`form-input ${errors.address ? "error" : ""}`}
               />
               {/* {errors.address && <div className="error-message">{errors.address}</div>} */}
             </div>
@@ -515,7 +608,7 @@ function Onboarding() {
                 value={formData.city}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.city ? 'error' : ''}`}
+                className={`form-input ${errors.city ? "error" : ""}`}
               />
               {/* {errors.city && <div className="error-message">{errors.city}</div>} */}
             </div>
@@ -527,7 +620,7 @@ function Onboarding() {
                 value={formData.state}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.state ? 'error' : ''}`}
+                className={`form-input ${errors.state ? "error" : ""}`}
               />
               {/* {errors.state && <div className="error-message">{errors.state}</div>} */}
             </div>
@@ -539,7 +632,7 @@ function Onboarding() {
                 value={formData.pincode}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.pincode ? 'error' : ''}`}
+                className={`form-input ${errors.pincode ? "error" : ""}`}
               />
               {/* {errors.pincode && <div className="error-message">{errors.pincode}</div>} */}
             </div>
@@ -556,7 +649,7 @@ function Onboarding() {
                 value={formData.experience}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.experience ? 'error' : ''}`}
+                className={`form-input ${errors.experience ? "error" : ""}`}
               />
               {/* {errors.experience && <div className="error-message">{errors.experience}</div>} */}
             </div>
@@ -568,7 +661,7 @@ function Onboarding() {
                 value={formData.currentSalary}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.currentSalary ? 'error' : ''}`}
+                className={`form-input ${errors.currentSalary ? "error" : ""}`}
               />
               {/* {errors.currentSalary && <div className="error-message">{errors.currentSalary}</div>} */}
             </div>
@@ -580,7 +673,7 @@ function Onboarding() {
                 value={formData.position}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.position ? 'error' : ''}`}
+                className={`form-input ${errors.position ? "error" : ""}`}
               />
               {/* {errors.position && <div className="error-message">{errors.position}</div>} */}
             </div>
@@ -592,7 +685,7 @@ function Onboarding() {
                 value={formData.uanNumber}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.uanNumber ? 'error' : ''}`}
+                className={`form-input ${errors.uanNumber ? "error" : ""}`}
               />
               {/* {errors.uanNumber && <div className="error-message">{errors.uanNumber}</div>} */}
             </div>
@@ -604,7 +697,7 @@ function Onboarding() {
                 value={formData.esiNumber}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.esiNumber ? 'error' : ''}`}
+                className={`form-input ${errors.esiNumber ? "error" : ""}`}
               />
               {/* {errors.esiNumber && <div className="error-message">{errors.esiNumber}</div>} */}
             </div>
@@ -616,7 +709,7 @@ function Onboarding() {
                 value={formData.aadharNumber}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.aadharNumber ? 'error' : ''}`}
+                className={`form-input ${errors.aadharNumber ? "error" : ""}`}
               />
               {/* {errors.aadharNumber && <div className="error-message">{errors.aadharNumber}</div>} */}
             </div>
@@ -628,7 +721,9 @@ function Onboarding() {
                 value={formData.namesAsOnAadhar}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.namesAsOnAadhar ? 'error' : ''}`}
+                className={`form-input ${
+                  errors.namesAsOnAadhar ? "error" : ""
+                }`}
               />
               {/* {errors.namesAsOnAadhar && <div className="error-message">{errors.namesAsOnAadhar}</div>} */}
             </div>
@@ -645,7 +740,7 @@ function Onboarding() {
                 value={formData.panNumber}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.panNumber ? 'error' : ''}`}
+                className={`form-input ${errors.panNumber ? "error" : ""}`}
               />
               {/* {errors.panNumber && <div className="error-message">{errors.panNumber}</div>} */}
             </div>
@@ -657,7 +752,7 @@ function Onboarding() {
                 value={formData.namesAsOnPan}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.namesAsOnPan ? 'error' : ''}`}
+                className={`form-input ${errors.namesAsOnPan ? "error" : ""}`}
               />
               {/* {errors.namesAsOnPan && <div className="error-message">{errors.namesAsOnPan}</div>} */}
             </div>
@@ -669,7 +764,9 @@ function Onboarding() {
                 value={formData.bankAccountNumber}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.bankAccountNumber ? 'error' : ''}`}
+                className={`form-input ${
+                  errors.bankAccountNumber ? "error" : ""
+                }`}
               />
               {/* {errors.bankAccountNumber && <div className="error-message">{errors.bankAccountNumber}</div>} */}
             </div>
@@ -681,7 +778,9 @@ function Onboarding() {
                 value={formData.namesAsPerBankDetails}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.namesAsPerBankDetails ? 'error' : ''}`}
+                className={`form-input ${
+                  errors.namesAsPerBankDetails ? "error" : ""
+                }`}
               />
               {/* {errors.namesAsPerBankDetails && <div className="error-message">{errors.namesAsPerBankDetails}</div>} */}
             </div>
@@ -693,7 +792,7 @@ function Onboarding() {
                 value={formData.bankName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.bankName ? 'error' : ''}`}
+                className={`form-input ${errors.bankName ? "error" : ""}`}
               />
               {/* {errors.bankName && <div className="error-message">{errors.bankName}</div>} */}
             </div>
@@ -705,7 +804,7 @@ function Onboarding() {
                 value={formData.branchName}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.branchName ? 'error' : ''}`}
+                className={`form-input ${errors.branchName ? "error" : ""}`}
               />
               {/* {errors.branchName && <div className="error-message">{errors.branchName}</div>} */}
             </div>
@@ -717,7 +816,7 @@ function Onboarding() {
                 value={formData.ifscCode}
                 onChange={handleInputChange}
                 onBlur={handleBlur}
-                className={`form-input ${errors.ifscCode ? 'error' : ''}`}
+                className={`form-input ${errors.ifscCode ? "error" : ""}`}
               />
               {/* {errors.ifscCode && <div className="error-message">{errors.ifscCode}</div>} */}
             </div>
@@ -740,15 +839,29 @@ function Onboarding() {
                       accept=".pdf, .doc, .docx, .jpg, .jpeg, .png"
                       disabled={doc.uploading}
                     />
-                    <label htmlFor={`document-upload-${index}`} className="button button-outlined">
-                      {doc.url ? 'Change File' : doc.file ? 'Change File' : 'Choose File'}
+                    <label
+                      htmlFor={`document-upload-${index}`}
+                      className="button button-outlined"
+                    >
+                      {doc.url
+                        ? "Change File"
+                        : doc.file
+                        ? "Change File"
+                        : "Choose File"}
                     </label>
                     {doc.uploading && (
-                      <span className="file-status uploading">Uploading...</span>
+                      <span className="file-status uploading">
+                        Uploading...
+                      </span>
                     )}
                     {doc.url && !doc.uploading && (
                       <>
-                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="file-link">
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="file-link"
+                        >
                           View Uploaded File
                         </a>
                         <button
@@ -757,7 +870,7 @@ function Onboarding() {
                           className="button button-secondary button-remove"
                           disabled={doc.deleting}
                         >
-                          {doc.deleting ? 'Removing...' : 'Remove'}
+                          {doc.deleting ? "Removing..." : "Remove"}
                         </button>
                       </>
                     )}
@@ -789,18 +902,17 @@ function Onboarding() {
       <div className="onboarding-paper">
         <h1 className="onboarding-title">Employee Onboarding</h1>
         {submitError && (
-          <div className="error-message global-error">
-            {submitError}
-          </div>
+          <div className="error-message global-error">{submitError}</div>
         )}
         {submitSuccess && (
-          <div className="success-message">
-            Form submitted successfully!
-          </div>
+          <div className="success-message">Form submitted successfully!</div>
         )}
         <div className="stepper">
           {steps.map((label, index) => (
-            <div key={label} className={`step ${index === activeStep ? 'active' : ''}`}>
+            <div
+              key={label}
+              className={`step ${index === activeStep ? "active" : ""}`}
+            >
               <div className="step-label">{label}</div>
             </div>
           ))}
@@ -822,7 +934,7 @@ function Onboarding() {
                 className="button button-primary"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             </div>
           </form>
@@ -854,4 +966,4 @@ function Onboarding() {
   );
 }
 
-export default Onboarding; 
+export default Onboarding;
