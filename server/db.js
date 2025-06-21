@@ -10,18 +10,49 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
+// Create separate connections for different databases
+const createConnection = (dbName) => {
+  return mongoose.createConnection(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    dbName: dbName
+  });
+};
+
+// Create connections for both databases
+const loginDB = createConnection('employeelogins');
+const employeeDB = createConnection('employeeRecords');
+
+// Handle connection events for login database
+loginDB.on('connected', () => {
+  console.log('MongoDB employeelogins database connected...');
+});
+
+loginDB.on('error', (err) => {
+  console.error('MongoDB employeelogins connection error:', err);
+});
+
+// Handle connection events for employee database
+employeeDB.on('connected', () => {
+  console.log('MongoDB employeeRecords database connected...');
+});
+
+employeeDB.on('error', (err) => {
+  console.error('MongoDB employeeRecords connection error:', err);
+});
+
 const connectDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      dbName: 'employeeRecords'
-    });
-    console.log('MongoDB connected...');
+    // Test both connections
+    await Promise.all([
+      loginDB.asPromise(),
+      employeeDB.asPromise()
+    ]);
+    console.log('All MongoDB databases connected successfully');
   } catch (err) {
-    console.error(err.message);
+    console.error('Database connection error:', err.message);
     process.exit(1);
   }
 };
 
-export default connectDB; 
+export { connectDB, loginDB, employeeDB }; 

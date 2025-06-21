@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
 
 // Import SVG icons
@@ -19,13 +19,24 @@ import Attendance from './components/Attendance/Attendance';
 import LeaveManagement from './components/LeaveManagement/LeaveManagement';
 import PerformanceTracking from './components/PerformanceTracking/PerformanceTracking';
 import PayrollPreview from './components/PayrollPreview/PayrollPreview';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openSections, setOpenSections] = useState({});
 
+  // Auth check
+  const isAuthenticated = !!localStorage.getItem('token');
+
   const handleDrawerToggle = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
   };
 
   const handleSectionToggle = (section) => {
@@ -153,6 +164,11 @@ function App() {
             <img src={sidebarOpen ? ExpandLessIcon : MenuIcon} alt="Menu" />
           </button>
           <h1 className="app-title">SynchroServe</h1>
+          {isAuthenticated && (
+            <button className="logout-button" onClick={handleLogout}>
+              Logout
+            </button>
+          )}
         </header>
 
         {sidebarOpen && <div className="sidebar-overlay" onClick={handleDrawerToggle}></div>}
@@ -163,12 +179,20 @@ function App() {
 
         <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/leave" element={<LeaveManagement />} />
-            <Route path="/performance" element={<PerformanceTracking />} />
-            <Route path="/payroll" element={<PayrollPreview />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            {isAuthenticated ? (
+              <>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/attendance" element={<Attendance />} />
+                <Route path="/leave" element={<LeaveManagement />} />
+                <Route path="/performance" element={<PerformanceTracking />} />
+                <Route path="/payroll" element={<PayrollPreview />} />
+              </>
+            ) : (
+              <Route path="*" element={<Login />} />
+            )}
           </Routes>
         </main>
       </div>

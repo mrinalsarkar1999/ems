@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { loginDB, employeeDB } from './db.js';
 
 const EmployeeSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
@@ -42,4 +43,17 @@ const EmployeeSchema = new mongoose.Schema({
   ]
 }, { timestamps: true });
 
-export default mongoose.model('Employee', EmployeeSchema);
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  role: { type: String, enum: ['admin', 'user'], default: 'user' }
+}, { timestamps: true });
+
+// Use employeeDB for Employee model (employeeRecords database)
+export const Employee = employeeDB.model('Employee', EmployeeSchema);
+
+// Use loginDB for User model (employeelogins database)
+export const User = loginDB.model('User', UserSchema, 'data');
