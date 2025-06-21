@@ -21,11 +21,11 @@ import PerformanceTracking from './components/PerformanceTracking/PerformanceTra
 import PayrollPreview from './components/PayrollPreview/PayrollPreview';
 
 function App() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openSections, setOpenSections] = useState({});
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setSidebarOpen(!sidebarOpen);
   };
 
   const handleSectionToggle = (section) => {
@@ -105,7 +105,7 @@ function App() {
   ];
 
   const drawer = (
-    <div className="sidebar">
+    <>
       <div className="sidebar-header">
         <h1 className="sidebar-title">SynchroServe</h1>
       </div>
@@ -132,7 +132,7 @@ function App() {
               <ul className="submenu">
                 {item.subItems.map((subItem) => (
                   <li key={subItem.text}>
-                    <Link to={subItem.path} className="submenu-item">
+                    <Link to={subItem.path} className="submenu-item" onClick={() => setSidebarOpen(false)}>
                       {subItem.text}
                     </Link>
                   </li>
@@ -142,7 +142,7 @@ function App() {
           </li>
         ))}
       </ul>
-    </div>
+    </>
   );
 
   return (
@@ -150,16 +150,18 @@ function App() {
       <div className="app-container">
         <header className="app-header">
           <button className="menu-button" onClick={handleDrawerToggle}>
-            <img src={MenuIcon} alt="Menu" />
+            <img src={sidebarOpen ? ExpandLessIcon : MenuIcon} alt="Menu" />
           </button>
           <h1 className="app-title">SynchroServe</h1>
         </header>
 
-        <nav className={`sidebar ${mobileOpen ? 'open' : ''}`}>
+        {sidebarOpen && <div className="sidebar-overlay" onClick={handleDrawerToggle}></div>}
+        
+        <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
           {drawer}
         </nav>
 
-        <main className="main-content">
+        <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/onboarding" element={<Onboarding />} />
