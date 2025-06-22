@@ -47,14 +47,14 @@ app.get("/", (req, res) => res.send("API Running"));
 // Employee Registration
 app.post("/api/employee/register", async (req, res) => {
   try {
-    const { username, email, password, firstName, lastName } = req.body;
+    const { employeeId, email, password, firstName, lastName } = req.body;
 
     // Check if user already exists
-    const existingUser = await EmployeeLogin.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await EmployeeLogin.findOne({ $or: [{ email }, { employeeId }] });
     if (existingUser) {
       return res
         .status(400)
-        .json({ error: "Employee already exists with this email or username" });
+        .json({ error: "Employee already exists with this email or employee ID" });
     }
 
     // Hash password
@@ -63,11 +63,12 @@ app.post("/api/employee/register", async (req, res) => {
 
     // Create new employee login
     const newEmployeeLogin = new EmployeeLogin({
-      username,
+      employeeId,
       email,
       password: hashedPassword,
       firstName,
       lastName,
+      status: 'Pending',
     });
 
     await newEmployeeLogin.save();
@@ -163,10 +164,10 @@ app.post("/api/centre/register", async (req, res) => {
 // Employee Login
 app.post("/api/employee/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { employeeId, password } = req.body;
 
-    // Find employee by username
-    const employee = await EmployeeLogin.findOne({ username });
+    // Find employee by employeeId
+    const employee = await EmployeeLogin.findOne({ employeeId });
     if (!employee) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
@@ -181,7 +182,7 @@ app.post("/api/employee/login", async (req, res) => {
     const token = jwt.sign(
       { 
         userId: employee._id, 
-        username: employee.username, 
+        employeeId: employee.employeeId, 
         role: employee.role,
         userType: 'employee'
       },
@@ -193,11 +194,12 @@ app.post("/api/employee/login", async (req, res) => {
       token,
       user: {
         id: employee._id,
-        username: employee.username,
+        employeeId: employee.employeeId,
         email: employee.email,
         firstName: employee.firstName,
         lastName: employee.lastName,
         role: employee.role,
+        status: employee.status,
         userType: 'employee'
       },
     });
@@ -299,7 +301,7 @@ app.post("/api/employee/refresh", async (req, res) => {
     const newToken = jwt.sign(
       { 
         userId: employee._id, 
-        username: employee.username, 
+        employeeId: employee.employeeId, 
         role: employee.role,
         userType: 'employee'
       },
@@ -351,6 +353,55 @@ app.post("/api/centre/refresh", async (req, res) => {
   }
 });
 
+// Get all centers endpoint
+app.get("/api/centers", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+    if (decoded.userType !== 'centre') {
+      return res.status(403).json({ error: "Access denied. Only centers can view center data." });
+    }
+
+    // Fetch all centers from centreLogins collection
+    const centers = await CentreLogin.find({}).select('-password'); // Exclude password field
+    
+    res.json(centers);
+  } catch (err) {
+    console.error("Error fetching centers:", err);
+    res.status(500).json({ error: "Failed to fetch centers" });
+  }
+});
+
+// Get all employees endpoint
+app.get("/api/employees", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+    if (decoded.userType !== 'centre') {
+      return res.status(403).json({ error: "Access denied. Only centers can view employee data." });
+    }
+
+    // Fetch all employees from employeeRecords database
+    const employees = await Employee.find({});
+    
+    res.json(employees);
+  } catch (err) {
+    console.error("Error fetching employees:", err);
+    if (err.name === "MongoError") {
+      return res.status(500).json({ error: `Database error: ${err.message}` });
+    }
+    res.status(500).json({ error: err.message || "Server Error while fetching employees" });
+  }
+});
+
 // File upload endpoint
 app.post("/api/upload", upload.single("file"), async (req, res) => {
   if (!req.file) {
@@ -391,6 +442,21 @@ app.delete("/api/upload", express.json(), async (req, res) => {
 // Define Routes
 app.post("/api/employees", async (req, res) => {
   try {
+    const { employeeId, firstName, lastName, email } = req.body;
+    // Find the employee login record
+    const loginRecord = await EmployeeLogin.findOne({ employeeId });
+    if (!loginRecord) {
+      return res.status(400).json({ error: "Employee record not found for this ID." });
+    }
+    // Compare firstName, lastName, and email
+    const mismatches = [];
+    if (loginRecord.firstName !== firstName) mismatches.push('First name');
+    if (loginRecord.lastName !== lastName) mismatches.push('Last name');
+    if (loginRecord.email !== email) mismatches.push('Email');
+    if (mismatches.length > 0) {
+      return res.status(400).json({ error: `${mismatches.join(', ')} do not match our records.` });
+    }
+    // If all match, proceed to save
     const newEmployee = new Employee(req.body);
     await newEmployee.save();
     res.status(201).json(newEmployee);
@@ -448,41 +514,97 @@ app.get("/api/getemployees", async (req, res) => {
   }
 });
 
-// Update employee status
+// Update employee status endpoint
 app.put("/api/employees/:id/status", async (req, res) => {
   try {
-    const { status, validationNote } = req.body;
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+    if (decoded.userType !== 'centre') {
+      return res.status(403).json({ error: "Access denied. Only centers can update employee status." });
+    }
+
     const { id } = req.params;
+    const { status, validationNote } = req.body;
 
-    if (!['Approved', 'Rejected'].includes(status)) {
-      return res.status(400).json({ error: "Invalid status" });
-    }
-
-    const updateData = { status };
-    if (status === 'Rejected') {
-      if (!validationNote) {
-        return res.status(400).json({ error: "Validation note is required for rejection" });
-      }
-      updateData.validationNote = validationNote;
-    }
-
-    const employee = await Employee.findByIdAndUpdate(
+    const updatedEmployee = await Employee.findByIdAndUpdate(
       id,
-      updateData,
+      { 
+        status,
+        ...(validationNote && { validationNote })
+      },
       { new: true }
     );
 
-    if (!employee) {
+    if (!updatedEmployee) {
       return res.status(404).json({ error: "Employee not found" });
     }
 
-    res.json(employee);
+    // If status is being set to Approved, update EmployeeLogin as well
+    if (status === 'Approved' && updatedEmployee.employeeId) {
+      await EmployeeLogin.findOneAndUpdate(
+        { employeeId: updatedEmployee.employeeId },
+        { status: 'Approved' }
+      );
+    }
+    // If status is being set to Rejected, update EmployeeLogin as well (set to Pending)
+    if (status === 'Rejected' && updatedEmployee.employeeId) {
+      await EmployeeLogin.findOneAndUpdate(
+        { employeeId: updatedEmployee.employeeId },
+        { status: 'Pending' }
+      );
+    }
+
+    res.json(updatedEmployee);
   } catch (err) {
-    console.error("Update status error:", err);
-    res.status(500).json({ error: "Server error while updating status" });
+    console.error("Error updating employee status:", err);
+    res.status(500).json({ error: "Failed to update employee status" });
+  }
+});
+
+// Check onboarding status for an employee
+app.get('/api/employee/onboarding-status', async (req, res) => {
+  try {
+    const { employeeId } = req.query;
+    if (!employeeId) {
+      return res.status(400).json({ error: 'employeeId is required' });
+    }
+    const record = await Employee.findOne({ employeeId });
+    res.json({ onboarded: !!record });
+  } catch (err) {
+    console.error('Error checking onboarding status:', err);
+    res.status(500).json({ error: 'Failed to check onboarding status' });
+  }
+});
+
+// Get latest employee info by employeeId
+app.get('/api/employee/info', async (req, res) => {
+  try {
+    const { employeeId } = req.query;
+    if (!employeeId) {
+      return res.status(400).json({ error: 'employeeId is required' });
+    }
+    const employee = await EmployeeLogin.findOne({ employeeId });
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    res.json({
+      id: employee._id,
+      employeeId: employee.employeeId,
+      email: employee.email,
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      role: employee.role,
+      status: employee.status,
+      userType: 'employee'
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch employee info' });
   }
 });
 
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

@@ -19,7 +19,6 @@ const TokenManager = () => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token);
-        console.log('Token refreshed successfully');
       } else {
         // Token refresh failed, logout user
         localStorage.removeItem('token');

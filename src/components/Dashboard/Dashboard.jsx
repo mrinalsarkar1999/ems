@@ -2,62 +2,72 @@ import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 
 function Dashboard() {
+  const [selectedCenter, setSelectedCenter] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [validationNote, setValidationNote] = useState('');
   const [loading, setLoading] = useState(true);
+  const [centers, setCenters] = useState([]);
   const [employees, setEmployees] = useState([]);
 
-  // Sample data for centers
-  const [centers] = useState([
-    {
-      id: 1,
-      name: 'Main Center',
-      location: 'New York',
-      employeeCount: 150,
-      status: 'Active',
-    },
-    {
-      id: 2,
-      name: 'Branch Office',
-      location: 'Los Angeles',
-      employeeCount: 75,
-      status: 'Active',
-    },
-    {
-      id: 3,
-      name: 'Remote Center',
-      location: 'Chicago',
-      employeeCount: 50,
-      status: 'Inactive',
-    },
-  ]);
-
   useEffect(() => {
-    // Fetch employees from backend
-    const fetchEmployees = async () => {
+    // Fetch both centers and employees
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch('http://localhost:5000/api/getemployees');
-        if (!response.ok) throw new Error('Failed to fetch employees');
-        const data = await response.json();
-        setEmployees(data);
+        const token = localStorage.getItem('token');
+        
+        // Fetch centers
+        const centersResponse = await fetch('http://localhost:5000/api/centers', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        // Fetch employees
+        const employeesResponse = await fetch('http://localhost:5000/api/employees', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (centersResponse.ok) {
+          const centersData = await centersResponse.json();
+          setCenters(centersData);
+        }
+
+        if (employeesResponse.ok) {
+          const employeesData = await employeesResponse.json();
+          setEmployees(employeesData);
+        }
       } catch (err) {
+        console.error('Error fetching data:', err);
+        setCenters([]);
         setEmployees([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchEmployees();
+    fetchData();
   }, []);
+
+  const handleViewCenter = (center) => {
+    setSelectedCenter(center);
+    setSelectedEmployee(null);
+    setOpenDialog(true);
+  };
 
   const handleViewEmployee = (employee) => {
     setSelectedEmployee(employee);
+    setSelectedCenter(null);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+    setSelectedCenter(null);
     setSelectedEmployee(null);
     setValidationNote('');
   };
@@ -69,6 +79,7 @@ function Dashboard() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ status: 'Approved' }),
       });
@@ -101,6 +112,7 @@ function Dashboard() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ status: 'Rejected', validationNote }),
       });
@@ -130,10 +142,18 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">Center Dashboard</h1>
+      <h1 className="dashboard-title">Center Management Dashboard</h1>
 
       {/* Statistics Overview */}
       <div className="stats-container">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <i className="icon">🏢</i>
+          </div>
+          <div className="stat-value">{centers.length}</div>
+          <div className="stat-label">Total Centers</div>
+        </div>
+
         <div className="stat-card">
           <div className="stat-icon">
             <i className="icon">👥</i>
@@ -144,33 +164,36 @@ function Dashboard() {
 
         <div className="stat-card">
           <div className="stat-icon">
-            <i className="icon">📍</i>
-          </div>
-          <div className="stat-value">{centers.length}</div>
-          <div className="stat-label">Active Centers</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">
-            <i className="icon">💼</i>
+            <i className="icon">✅</i>
           </div>
           <div className="stat-value">
             {employees.filter(emp => emp.status === 'Approved').length}
           </div>
-          <div className="stat-label">Active Employees</div>
+          <div className="stat-label">Approved Employees</div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">
+            <i className="icon">⏳</i>
+          </div>
+          <div className="stat-value">
+            {employees.filter(emp => emp.status === 'Pending').length}
+          </div>
+          <div className="stat-label">Pending Employees</div>
         </div>
       </div>
 
       {/* Employee List */}
       <div className="card">
         <div className="card-content">
-          <h2>Employee List</h2>
+          <h2>Employee Records</h2>
           <div className="table-container">
             <table className="table">
               <thead>
                 <tr>
                   <th>Name</th>
                   <th>Position</th>
+                  <th>Email</th>
                   <th>Status</th>
                   <th>Join Date</th>
                   <th>Actions</th>
@@ -181,12 +204,13 @@ function Dashboard() {
                   <tr key={employee._id}>
                     <td>{employee.firstName} {employee.lastName}</td>
                     <td>{employee.position || '-'}</td>
+                    <td>{employee.email || '-'}</td>
                     <td>
                       <span className={`status-chip status-${(employee.status || 'Pending').toLowerCase()}`}>
                         {employee.status || 'Pending'}
                       </span>
                     </td>
-                    <td>{employee.joinDate || (employee.createdAt ? employee.createdAt.substring(0, 10) : '-')}</td>
+                    <td>{employee.createdAt ? new Date(employee.createdAt).toLocaleDateString() : '-'}</td>
                     <td>
                       <button
                         className="icon-button"
@@ -206,27 +230,40 @@ function Dashboard() {
       {/* Centers List */}
       <div className="card">
         <div className="card-content">
-          <h2>Centers</h2>
+          <h2>Registered Centers</h2>
           <div className="table-container">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Location</th>
-                  <th>Employees</th>
-                  <th>Status</th>
+                  <th>Center Name</th>
+                  <th>Center Code</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Registration Date</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {centers.map((center) => (
-                  <tr key={center.id}>
-                    <td>{center.name}</td>
-                    <td>{center.location}</td>
-                    <td>{center.employeeCount}</td>
+                  <tr key={center._id}>
+                    <td>{center.centreName}</td>
+                    <td>{center.centreCode}</td>
+                    <td>{center.username}</td>
+                    <td>{center.email}</td>
                     <td>
-                      <span className={`status-chip status-${center.status.toLowerCase()}`}>
-                        {center.status}
+                      <span className={`status-chip status-${center.role === 'admin' ? 'admin' : 'centre'}`}>
+                        {center.role}
                       </span>
+                    </td>
+                    <td>{center.createdAt ? new Date(center.createdAt).toLocaleDateString() : '-'}</td>
+                    <td>
+                      <button
+                        className="icon-button"
+                        onClick={() => handleViewCenter(center)}
+                      >
+                        <i className="icon">👁️</i>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -249,6 +286,10 @@ function Dashboard() {
               <div className="form-group">
                 <label className="form-label">Position</label>
                 <div>{selectedEmployee.position || '-'}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <div>{selectedEmployee.email || '-'}</div>
               </div>
               <div className="form-group">
                 <label className="form-label">Status</label>
@@ -303,6 +344,57 @@ function Dashboard() {
                 onClick={handleReject}
               >
                 Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Center Details Dialog */}
+      {openDialog && selectedCenter && (
+        <div className="dialog-overlay">
+          <div className="dialog">
+            <h2 className="dialog-title">Center Details</h2>
+            <div className="dialog-content">
+              <div className="form-group">
+                <label className="form-label">Center Name</label>
+                <div>{selectedCenter.centreName}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Center Code</label>
+                <div>{selectedCenter.centreCode}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <div>{selectedCenter.username}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <div>{selectedCenter.email}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <div>
+                  <span className={`status-chip status-${selectedCenter.role === 'admin' ? 'admin' : 'centre'}`}>
+                    {selectedCenter.role}
+                  </span>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Registration Date</label>
+                <div>{selectedCenter.createdAt ? new Date(selectedCenter.createdAt).toLocaleString() : '-'}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Last Updated</label>
+                <div>{selectedCenter.updatedAt ? new Date(selectedCenter.updatedAt).toLocaleString() : '-'}</div>
+              </div>
+            </div>
+            <div className="dialog-actions">
+              <button
+                className="button button-secondary"
+                onClick={handleCloseDialog}
+              >
+                Close
               </button>
             </div>
           </div>

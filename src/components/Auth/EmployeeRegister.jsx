@@ -4,7 +4,7 @@ import './Login.css';
 
 function EmployeeRegister() {
   const [form, setForm] = useState({
-    username: '',
+    employeeId: '',
     email: '',
     password: '',
     firstName: '',
@@ -25,10 +25,11 @@ function EmployeeRegister() {
     setError('');
     setSuccess(false);
     try {
+      const registrationData = { ...form, status: 'Pending' };
       const response = await fetch('http://localhost:5000/api/employee/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(registrationData)
       });
       const data = await response.json();
       if (!response.ok) {
@@ -74,12 +75,12 @@ function EmployeeRegister() {
           />
         </div>
         <div className="login-field">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="employeeId">Employee ID</label>
           <input
-            id="username"
-            name="username"
+            id="employeeId"
+            name="employeeId"
             type="text"
-            value={form.username}
+            value={form.employeeId}
             onChange={handleChange}
             required
             className="bouncy-input"

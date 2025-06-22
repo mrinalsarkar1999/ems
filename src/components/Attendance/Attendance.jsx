@@ -7,6 +7,12 @@ function Attendance() {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [filterStatus, setFilterStatus] = useState('all');
   const [showCalendar, setShowCalendar] = useState(false);
+  const [attendanceData, setAttendanceData] = useState({
+    checkIn: '',
+    checkOut: '',
+    checkInDate: '',
+    checkOutDate: ''
+  });
   const [attendanceRecords] = useState([
     {
       id: 1,
@@ -52,19 +58,34 @@ function Attendance() {
     },
   ]);
 
+  const [message, setMessage] = useState('');
+
   const handleCheckIn = () => {
-    // Implement check-in logic
-    console.log('Checked in at:', new Date().toLocaleTimeString());
+    const now = new Date();
+    setAttendanceData(prev => ({
+      ...prev,
+      checkIn: now.toLocaleTimeString(),
+      checkInDate: now.toLocaleDateString()
+    }));
+    setMessage('Checked in successfully!');
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const handleCheckOut = () => {
-    // Implement check-out logic
-    console.log('Checked out at:', new Date().toLocaleTimeString());
+    const now = new Date();
+    setAttendanceData(prev => ({
+      ...prev,
+      checkOut: now.toLocaleTimeString(),
+      checkOutDate: now.toLocaleDateString()
+    }));
+    setMessage('Checked out successfully!');
+    setTimeout(() => setMessage(''), 3000);
   };
 
-  const handleExportReport = () => {
-    // Implement export logic
-    console.log('Exporting attendance report...');
+  const handleExport = () => {
+    // Export functionality would go here
+    setMessage('Exporting attendance report...');
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const calculateMonthlyStats = () => {
@@ -93,7 +114,7 @@ function Attendance() {
           </button>
           <button
             className="button button-outlined"
-            onClick={handleExportReport}
+            onClick={handleExport}
           >
             <i className="icon">📥</i>
             Export Report
