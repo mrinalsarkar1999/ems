@@ -318,6 +318,12 @@ function Onboarding() {
         .filter((doc) => doc.url)
         .map((doc) => ({ type: doc.type, url: doc.url, key: doc.key }));
 
+      // Add employeeId from localStorage.user
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.employeeId) {
+        dataToSubmit.employeeId = user.employeeId;
+      }
+
       const response = await fetch("http://localhost:5000/api/employees", {
         method: "POST",
         headers: {
@@ -327,6 +333,8 @@ function Onboarding() {
       });
 
       const result = await response.json();
+      console.log(result);
+      console.log(response);
 
       if (!response.ok) {
         // Extract the specific error message from the server response
@@ -334,9 +342,12 @@ function Onboarding() {
         throw new Error(errorMessage);
       }
 
-      console.log("Form submission successful:", result);
-      setSubmitSuccess(true);
-      setFormData(initialFormData);
+      if (response.ok) {
+        setSubmitSuccess(true);
+        setFormData(initialFormData);
+      } else {
+        setSubmitError("Failed to submit form. Please try again.");
+      }
     } catch (error) {
       console.error("Form submission error:", error);
       

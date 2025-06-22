@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { loginDB, employeeDB } from './db.js';
 
 const EmployeeSchema = new mongoose.Schema({
+  employeeId: { type: String, required: true, unique: true },
   firstName: { type: String, required: true },
   lastName: { type: String },
   fatherName: { type: String },
@@ -46,12 +47,13 @@ const EmployeeSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const EmployeeLoginSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
+  employeeId: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  role: { type: String, enum: ['employee', 'admin'], default: 'employee' }
+  role: { type: String, enum: ['employee', 'admin'], default: 'employee' },
+  status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' }
 }, { timestamps: true });
 
 const CentreLoginSchema = new mongoose.Schema({

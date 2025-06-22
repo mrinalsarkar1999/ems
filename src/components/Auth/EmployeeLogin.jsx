@@ -3,11 +3,17 @@ import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
 function EmployeeLogin() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({
+    employeeId: '',
+    password: ''
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +23,7 @@ function EmployeeLogin() {
       const response = await fetch('http://localhost:5000/api/employee/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify(form)
       });
       const data = await response.json();
       if (!response.ok) {
@@ -27,10 +33,10 @@ function EmployeeLogin() {
       }
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      setLoading(false);
-      window.location.replace('/');
+      window.location.href = '/';
     } catch (err) {
       setError('Network error');
+    } finally {
       setLoading(false);
     }
   };
@@ -40,14 +46,14 @@ function EmployeeLogin() {
       <form className="login-form bouncy" onSubmit={handleSubmit} autoComplete="off">
         <h2 className="login-title">Employee Login</h2>
         <div className="login-field">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="employeeId">Employee ID</label>
           <input
-            id="username"
+            id="employeeId"
+            name="employeeId"
             type="text"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
+            value={form.employeeId}
+            onChange={handleChange}
             required
-            autoFocus
             className="bouncy-input"
           />
         </div>
@@ -55,9 +61,10 @@ function EmployeeLogin() {
           <label htmlFor="password">Password</label>
           <input
             id="password"
+            name="password"
             type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
+            value={form.password}
+            onChange={handleChange}
             required
             className="bouncy-input"
           />
@@ -68,7 +75,7 @@ function EmployeeLogin() {
         </button>
         <div className="login-footer">
           <span>Don't have an account?</span>
-          <Link to="/employee/register" className="login-link">Register as Employee</Link>
+          <Link to="/employee/register" className="login-link">Employee Register</Link>
         </div>
         <div className="login-footer">
           <span>Centre login?</span>

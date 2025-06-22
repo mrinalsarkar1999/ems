@@ -1,12 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './EmployeeHome.css';
 
 function EmployeeHome() {
-  const user = JSON.parse(localStorage.getItem('user'));
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [onboarded, setOnboarded] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOnboardingStatus() {
+      if (!user?.employeeId) return;
+      try {
+        const res = await fetch(`http://localhost:5000/api/employee/onboarding-status?employeeId=${user.employeeId}`);
+        const data = await res.json();
+        setOnboarded(data.onboarded);
+      } catch (err) {
+        setOnboarded(true); // fail safe: don't block UI
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchOnboardingStatus();
+  }, [user?.employeeId]);
+
+  // Fetch latest user info on mount
+  useEffect(() => {
+    async function fetchUserInfo() {
+      if (!user?.employeeId) return;
+      try {
+        const res = await fetch(`http://localhost:5000/api/employee/info?employeeId=${user.employeeId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+          localStorage.setItem('user', JSON.stringify(data));
+        }
+      } catch {}
+    }
+    fetchUserInfo();
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div className="employee-home">
+      {!loading && !onboarded && (
+        <div className="onboarding-warning" style={{color: 'orange', margin: '16px 0', fontWeight: 'bold'}}>
+          Please complete the onboarding process.
+        </div>
+      )}
       <div className="welcome-section">
         <div className="welcome-card">
           <div className="profile-header">
@@ -16,7 +56,7 @@ function EmployeeHome() {
             <div className="profile-info">
               <h1>Welcome back, {user?.firstName}!</h1>
               <p className="employee-role">Employee</p>
-              <p className="employee-id">ID: {user?.id?.slice(-8)}</p>
+              <p className="employee-id">ID: {user?.employeeId}</p>
             </div>
           </div>
           
@@ -45,18 +85,20 @@ function EmployeeHome() {
             <h3>Onboarding</h3>
             <p>Complete your onboarding process</p>
           </Link>
-          
-          <Link to="/attendance" className="action-card">
-            <div className="action-icon">📅</div>
-            <h3>Attendance</h3>
-            <p>Mark your attendance and view records</p>
-          </Link>
-          
-          <Link to="/leave" className="action-card">
-            <div className="action-icon">🏖️</div>
-            <h3>Leave Management</h3>
-            <p>Request and manage your leaves</p>
-          </Link>
+          {user?.status === 'Approved' && (
+            <>
+              <Link to="/attendance" className="action-card">
+                <div className="action-icon">📅</div>
+                <h3>Attendance</h3>
+                <p>Mark your attendance and view records</p>
+              </Link>
+              <Link to="/leave" className="action-card">
+                <div className="action-icon">🏖️</div>
+                <h3>Leave Management</h3>
+                <p>Request and manage your leaves</p>
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -92,8 +134,8 @@ function EmployeeHome() {
           </div>
           
           <div className="profile-field">
-            <label>Username</label>
-            <span>{user?.username}</span>
+            <label>Employee ID</label>
+            <span>{user?.employeeId}</span>
           </div>
           
           <div className="profile-field">
@@ -113,7 +155,7 @@ function EmployeeHome() {
           
           <div className="profile-field">
             <label>Status</label>
-            <span className="status-badge active">Active</span>
+            <span className={`status-badge ${user?.status?.toLowerCase()}`}>{user?.status || "Pending"}</span>
           </div>
         </div>
       </div>

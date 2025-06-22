@@ -74,28 +74,31 @@ function App() {
       path: '/onboarding',
       description: 'Manage new employee onboarding process',
     },
-    {
-      text: 'Attendance',
-      icon: CalendarTodayIcon,
-      path: '/attendance',
-      description: 'Track employee attendance and time records',
-      subItems: [
-        { text: 'Daily Attendance', path: '/attendance' },
-        { text: 'Time Tracking', path: '/attendance' },
-        { text: 'Reports', path: '/ ' },
-      ],
-    },
-    {
-      text: 'Leave',
-      icon: WorkOffIcon,
-      path: '/leave',
-      description: 'Manage employee leave requests and balances',
-      subItems: [
-        { text: 'Leave Requests', path: '/leave' },
-        { text: 'Leave Balance', path: '/leave' },
-        { text: 'Calendar', path: '/leave' },
-      ],
-    },
+    // Attendance and Leave only if status is Approved
+    ...(user?.status === 'Approved' ? [
+      {
+        text: 'Attendance',
+        icon: CalendarTodayIcon,
+        path: '/attendance',
+        description: 'Track employee attendance and time records',
+        subItems: [
+          { text: 'Daily Attendance', path: '/attendance' },
+          { text: 'Time Tracking', path: '/attendance' },
+          { text: 'Reports', path: '/ ' },
+        ],
+      },
+      {
+        text: 'Leave',
+        icon: WorkOffIcon,
+        path: '/leave',
+        description: 'Manage employee leave requests and balances',
+        subItems: [
+          { text: 'Leave Requests', path: '/leave' },
+          { text: 'Leave Balance', path: '/leave' },
+          { text: 'Calendar', path: '/leave' },
+        ],
+      },
+    ] : []),
   ];
 
   // Centre menu items (full access)

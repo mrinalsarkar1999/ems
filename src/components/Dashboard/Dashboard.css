@@ -170,6 +170,16 @@
   color: #c62828;
 }
 
+.status-admin {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-centre {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
 /* Buttons */
 .button {
   padding: 0.5rem 1rem;
