@@ -6,6 +6,8 @@ const EmployeeSchema = new mongoose.Schema({
   lastName: { type: String },
   fatherName: { type: String },
   motherName: { type: String },
+  status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+  validationNote: { type: String },
   highestQualification: { type: String },
   dobAsPerCertificate: { type: Date },
   dobAsPerCelebration: { type: Date },
@@ -55,5 +57,5 @@ const UserSchema = new mongoose.Schema({
 // Use employeeDB for Employee model (employeeRecords database)
 export const Employee = employeeDB.model('Employee', EmployeeSchema);
 
-// Use loginDB for User model (employeelogins database)
-export const User = loginDB.model('User', UserSchema, 'data');
+// Use loginDB for User model (logins database)
+export const User = loginDB.model('User', UserSchema, 'employeeLogins');

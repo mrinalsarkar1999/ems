@@ -20,16 +20,16 @@ const createConnection = (dbName) => {
 };
 
 // Create connections for both databases
-const loginDB = createConnection('employeelogins');
+const loginDB = createConnection('logins');
 const employeeDB = createConnection('employeeRecords');
 
 // Handle connection events for login database
 loginDB.on('connected', () => {
-  console.log('MongoDB employeelogins database connected...');
+  console.log('MongoDB logins database connected...');
 });
 
 loginDB.on('error', (err) => {
-  console.error('MongoDB employeelogins connection error:', err);
+  console.error('MongoDB logins connection error:', err);
 });
 
 // Handle connection events for employee database

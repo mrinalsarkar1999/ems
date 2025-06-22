@@ -62,16 +62,62 @@ function Dashboard() {
     setValidationNote('');
   };
 
-  const handleApprove = () => {
-    // Implement approval logic
-    console.log('Approved employee:', selectedEmployee?._id);
-    handleCloseDialog();
+  const handleApprove = async () => {
+    if (!selectedEmployee) return;
+    try {
+      const response = await fetch(`http://localhost:5000/api/employees/${selectedEmployee._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'Approved' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to approve employee');
+      }
+
+      const updatedEmployee = await response.json();
+
+      setEmployees(employees.map(emp => 
+        emp._id === selectedEmployee._id ? updatedEmployee : emp
+      ));
+      handleCloseDialog();
+    } catch (err) {
+      console.error('Approval failed:', err);
+    }
   };
 
-  const handleReject = () => {
-    // Implement rejection logic
-    console.log('Rejected employee:', selectedEmployee?._id);
-    handleCloseDialog();
+  const handleReject = async () => {
+    if (!selectedEmployee) return;
+
+    if (!validationNote.trim()) {
+      alert('Validation note is required for rejection.');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:5000/api/employees/${selectedEmployee._id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'Rejected', validationNote }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reject employee');
+      }
+      
+      const updatedEmployee = await response.json();
+
+      setEmployees(employees.map(emp => 
+        emp._id === selectedEmployee._id ? updatedEmployee : emp
+      ));
+      handleCloseDialog();
+    } catch (err) {
+      console.error('Rejection failed:', err);
+    }
   };
 
   if (loading) {

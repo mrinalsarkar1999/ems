@@ -21,6 +21,7 @@ import PerformanceTracking from './components/PerformanceTracking/PerformanceTra
 import PayrollPreview from './components/PayrollPreview/PayrollPreview';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
+import InactivityTimer from './components/Auth/InactivityTimer';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -178,6 +179,7 @@ function App() {
         </nav>
 
         <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
+          {isAuthenticated && <InactivityTimer onLogout={handleLogout} />}
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

@@ -119,7 +119,7 @@ app.post("/api/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, username: user.username, role: user.role },
       process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: "24h" }
+      { expiresIn: "5m" }
     );
 
     res.json({
@@ -244,6 +244,41 @@ app.get("/api/getemployees", async (req, res) => {
     }
     
     res.status(500).json({ error: err.message || "Server Error while fetching employees" });
+  }
+});
+
+// Update employee status
+app.put("/api/employees/:id/status", async (req, res) => {
+  try {
+    const { status, validationNote } = req.body;
+    const { id } = req.params;
+
+    if (!['Approved', 'Rejected'].includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    const updateData = { status };
+    if (status === 'Rejected') {
+      if (!validationNote) {
+        return res.status(400).json({ error: "Validation note is required for rejection" });
+      }
+      updateData.validationNote = validationNote;
+    }
+
+    const employee = await Employee.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    );
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    res.json(employee);
+  } catch (err) {
+    console.error("Update status error:", err);
+    res.status(500).json({ error: "Server error while updating status" });
   }
 });
 
