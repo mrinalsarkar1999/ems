@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import './App.css';
 
 // Import SVG icons
@@ -19,9 +19,15 @@ import Attendance from './components/Attendance/Attendance';
 import LeaveManagement from './components/LeaveManagement/LeaveManagement';
 import PerformanceTracking from './components/PerformanceTracking/PerformanceTracking';
 import PayrollPreview from './components/PayrollPreview/PayrollPreview';
-import Login from './components/Auth/Login';
-import Register from './components/Auth/Register';
+import EmployeeHome from './components/Employee/EmployeeHome';
+import EmployeeLogin from './components/Auth/EmployeeLogin';
+import CentreLogin from './components/Auth/CentreLogin';
+import EmployeeRegister from './components/Auth/EmployeeRegister';
+import CentreRegister from './components/Auth/CentreRegister';
+import LoginSelection from './components/Auth/LoginSelection';
 import InactivityTimer from './components/Auth/InactivityTimer';
+import TokenManager from './components/Auth/TokenManager';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,6 +35,8 @@ function App() {
 
   // Auth check
   const isAuthenticated = !!localStorage.getItem('token');
+  const user = isAuthenticated ? JSON.parse(localStorage.getItem('user')) : null;
+  const userType = user?.userType;
 
   const handleDrawerToggle = () => {
     setSidebarOpen(!sidebarOpen);
@@ -37,7 +45,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   const handleSectionToggle = (section) => {
@@ -47,15 +55,16 @@ function App() {
     }));
   };
 
-  const menuItems = [
+  // Employee menu items (restricted access)
+  const employeeMenuItems = [
     {
-      text: 'Dashboard',
+      text: 'Home',
       icon: DashboardIcon,
       path: '/',
-      description: 'Overview of center operations and key metrics',
+      description: 'Employee dashboard and profile overview',
       subItems: [
-        { text: 'Center Overview', path: '/' },
-        { text: 'Employee Stats', path: '/' },
+        { text: 'Dashboard', path: '/' },
+        { text: 'Profile', path: '/' },
         { text: 'Quick Actions', path: '/' },
       ],
     },
@@ -64,11 +73,6 @@ function App() {
       icon: GroupAddIcon,
       path: '/onboarding',
       description: 'Manage new employee onboarding process',
-      subItems: [
-        { text: 'New Employee Form', path: '/onboarding' },
-        { text: 'Document Upload', path: '/ ' },
-        { text: 'Training Schedule', path: '/ ' },
-      ],
     },
     {
       text: 'Attendance',
@@ -90,6 +94,21 @@ function App() {
         { text: 'Leave Requests', path: '/leave' },
         { text: 'Leave Balance', path: '/leave' },
         { text: 'Calendar', path: '/leave' },
+      ],
+    },
+  ];
+
+  // Centre menu items (full access)
+  const centreMenuItems = [
+    {
+      text: 'Dashboard',
+      icon: DashboardIcon,
+      path: '/dashboard',
+      description: 'Overview of center operations and key metrics',
+      subItems: [
+        { text: 'Center Overview', path: '/dashboard' },
+        { text: 'Employee Stats', path: '/dashboard' },
+        { text: 'Quick Actions', path: '/dashboard' },
       ],
     },
     {
@@ -116,6 +135,9 @@ function App() {
     },
   ];
 
+  // Select menu items based on user type
+  const menuItems = userType === 'employee' ? employeeMenuItems : centreMenuItems;
+
   const drawer = (
     <>
       <div className="sidebar-header">
@@ -124,32 +146,46 @@ function App() {
       <ul className="menu-list">
         {menuItems.map((item) => (
           <li key={item.text}>
-            <button
-              className="menu-item"
-              onClick={() => handleSectionToggle(item.text)}
-              data-section={item.text}
-            >
-              <img src={item.icon} alt="" className="menu-item-icon" />
-              <div className="menu-item-text">
-                <div>{item.text}</div>
-                <div className="menu-item-description">{item.description}</div>
-              </div>
-              <img
-                src={openSections[item.text] ? ExpandLessIcon : ExpandMoreIcon}
-                alt=""
-                className="menu-item-icon expand-icon"
-              />
-            </button>
-            {openSections[item.text] && (
-              <ul className="submenu">
-                {item.subItems.map((subItem) => (
-                  <li key={subItem.text}>
-                    <Link to={subItem.path} className="submenu-item" onClick={() => setSidebarOpen(false)}>
-                      {subItem.text}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            {item.subItems ? (
+              // Menu item with sub-items (expandable)
+              <>
+                <button
+                  className="menu-item"
+                  onClick={() => handleSectionToggle(item.text)}
+                  data-section={item.text}
+                >
+                  <img src={item.icon} alt="" className="menu-item-icon" />
+                  <div className="menu-item-text">
+                    <div>{item.text}</div>
+                    <div className="menu-item-description">{item.description}</div>
+                  </div>
+                  <img
+                    src={openSections[item.text] ? ExpandLessIcon : ExpandMoreIcon}
+                    alt=""
+                    className="menu-item-icon expand-icon"
+                  />
+                </button>
+                {openSections[item.text] && (
+                  <ul className="submenu">
+                    {item.subItems.map((subItem) => (
+                      <li key={subItem.text}>
+                        <Link to={subItem.path} className="submenu-item" onClick={() => setSidebarOpen(false)}>
+                          {subItem.text}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            ) : (
+              // Menu item without sub-items (direct link)
+              <Link to={item.path} className="menu-item" onClick={() => setSidebarOpen(false)}>
+                <img src={item.icon} alt="" className="menu-item-icon" />
+                <div className="menu-item-text">
+                  <div>{item.text}</div>
+                  <div className="menu-item-description">{item.description}</div>
+                </div>
+              </Link>
             )}
           </li>
         ))}
@@ -164,7 +200,14 @@ function App() {
           <button className="menu-button" onClick={handleDrawerToggle}>
             <img src={sidebarOpen ? ExpandLessIcon : MenuIcon} alt="Menu" />
           </button>
-          <h1 className="app-title">SynchroServe</h1>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h1 className="app-title">SynchroServe</h1>
+            {isAuthenticated && user && (
+              <small style={{ color: '#fff', fontSize: '16px' }}>
+                Welcome, {userType === 'employee' ? `${user.firstName} ${user.lastName}` : user.centreName}
+              </small>
+            )}
+          </div>
           {isAuthenticated && (
             <button className="logout-button" onClick={handleLogout}>
               Logout
@@ -180,20 +223,62 @@ function App() {
 
         <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
           {isAuthenticated && <InactivityTimer onLogout={handleLogout} />}
+          {isAuthenticated && <TokenManager />}
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            {isAuthenticated ? (
-              <>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/attendance" element={<Attendance />} />
-                <Route path="/leave" element={<LeaveManagement />} />
-                <Route path="/performance" element={<PerformanceTracking />} />
-                <Route path="/payroll" element={<PayrollPreview />} />
-              </>
-            ) : (
-              <Route path="*" element={<Login />} />
+            <Route path="/" element={isAuthenticated ? 
+              (userType === 'centre' ? <Dashboard /> : <EmployeeHome />) : 
+              <LoginSelection />} 
+            />
+            <Route path="/employee/login" element={<EmployeeLogin />} />
+            <Route path="/centre/login" element={<CentreLogin />} />
+            <Route path="/employee/register" element={<EmployeeRegister />} />
+            <Route path="/centre/register" element={<CentreRegister />} />
+            <Route path="/login-selection" element={<LoginSelection />} />
+            
+            {/* Employee-only routes - TRUE BLOCKING */}
+            <Route path="/onboarding" element={
+              <ProtectedRoute allowedUserTypes={['employee']}>
+                <Onboarding />
+              </ProtectedRoute>
+            } />
+            <Route path="/attendance" element={
+              <ProtectedRoute allowedUserTypes={['employee']}>
+                <Attendance />
+              </ProtectedRoute>
+            } />
+            <Route path="/leave" element={
+              <ProtectedRoute allowedUserTypes={['employee']}>
+                <LeaveManagement />
+              </ProtectedRoute>
+            } />
+            
+            {/* Centre-only routes - TRUE BLOCKING */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute allowedUserTypes={['centre']}>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/performance" element={
+              <ProtectedRoute allowedUserTypes={['centre']}>
+                <PerformanceTracking />
+              </ProtectedRoute>
+            } />
+            <Route path="/payroll" element={
+              <ProtectedRoute allowedUserTypes={['centre']}>
+                <PayrollPreview />
+              </ProtectedRoute>
+            } />
+            
+            {/* Catch-all route for authenticated users */}
+            {isAuthenticated && (
+              <Route path="*" element={
+                <Navigate to={userType === 'employee' ? '/' : '/dashboard'} replace />
+              } />
+            )}
+            
+            {/* Public routes */}
+            {!isAuthenticated && (
+              <Route path="*" element={<LoginSelection />} />
             )}
           </Routes>
         </main>

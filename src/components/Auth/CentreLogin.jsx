@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
-function Login() {
+function CentreLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,7 +14,7 @@ function Login() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch('http://localhost:5000/api/centre/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -38,7 +38,7 @@ function Login() {
   return (
     <div className="login-bg">
       <form className="login-form bouncy" onSubmit={handleSubmit} autoComplete="off">
-        <h2 className="login-title">Sign In</h2>
+        <h2 className="login-title">Centre Login</h2>
         <div className="login-field">
           <label htmlFor="username">Username</label>
           <input
@@ -68,11 +68,15 @@ function Login() {
         </button>
         <div className="login-footer">
           <span>Don't have an account?</span>
-          <Link to="/register" className="login-link">Register</Link>
+          <Link to="/centre/register" className="login-link">Register as Centre</Link>
+        </div>
+        <div className="login-footer">
+          <span>Employee login?</span>
+          <Link to="/employee/login" className="login-link">Employee Login</Link>
         </div>
       </form>
     </div>
   );
 }
 
-export default Login; 
+export default CentreLogin; 

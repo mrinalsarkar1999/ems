@@ -3,7 +3,7 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { connectDB } from "./db.js";
-import { Employee, User } from "./model.js";
+import { Employee, EmployeeLogin, CentreLogin } from "./model.js";
 import multer from "multer";
 import AWS from "aws-sdk";
 import fs from "fs";
@@ -43,24 +43,26 @@ app.use(express.json({ extended: false }));
 app.get("/", (req, res) => res.send("API Running"));
 
 // Authentication Routes
-app.post("/api/register", async (req, res) => {
+
+// Employee Registration
+app.post("/api/employee/register", async (req, res) => {
   try {
     const { username, email, password, firstName, lastName } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await EmployeeLogin.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       return res
         .status(400)
-        .json({ error: "User already exists with this email or username" });
+        .json({ error: "Employee already exists with this email or username" });
     }
 
     // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create new user
-    const newUser = new User({
+    // Create new employee login
+    const newEmployeeLogin = new EmployeeLogin({
       username,
       email,
       password: hashedPassword,
@@ -68,10 +70,10 @@ app.post("/api/register", async (req, res) => {
       lastName,
     });
 
-    await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
+    await newEmployeeLogin.save();
+    res.status(201).json({ message: "Employee registered successfully" });
   } catch (err) {
-    console.error("Registration error:", err);
+    console.error("Employee registration error:", err);
     
     // Handle Mongoose validation errors
     if (err.name === "ValidationError") {
@@ -99,42 +101,108 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-app.post("/api/login", async (req, res) => {
+// Centre Registration
+app.post("/api/centre/register", async (req, res) => {
+  try {
+    const { username, email, password, centreName, centreCode } = req.body;
+
+    // Check if centre already exists
+    const existingCentre = await CentreLogin.findOne({ 
+      $or: [{ email }, { username }, { centreCode }] 
+    });
+    if (existingCentre) {
+      return res
+        .status(400)
+        .json({ error: "Centre already exists with this email, username, or centre code" });
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new centre login
+    const newCentreLogin = new CentreLogin({
+      username,
+      email,
+      password: hashedPassword,
+      centreName,
+      centreCode,
+    });
+
+    await newCentreLogin.save();
+    res.status(201).json({ message: "Centre registered successfully" });
+  } catch (err) {
+    console.error("Centre registration error:", err);
+    
+    // Handle Mongoose validation errors
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors).map((val) => val.message);
+      return res.status(400).json({ error: messages.join(", ") });
+    }
+    
+    // Handle duplicate key errors
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyValue)[0];
+      return res.status(400).json({ error: `Duplicate value for field: ${field}` });
+    }
+    
+    // Handle MongoDB connection errors
+    if (err.name === "MongoNetworkError" || err.name === "MongoServerSelectionError") {
+      return res.status(500).json({ error: "Database connection error. Please try again later." });
+    }
+    
+    // Handle other MongoDB errors
+    if (err.name === "MongoError") {
+      return res.status(500).json({ error: `Database error: ${err.message}` });
+    }
+    
+    res.status(500).json({ error: err.message || "Server error during registration" });
+  }
+});
+
+// Employee Login
+app.post("/api/employee/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Find user by username
-    const user = await User.findOne({ username });
-    if (!user) {
+    // Find employee by username
+    const employee = await EmployeeLogin.findOne({ username });
+    if (!employee) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
     // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, employee.password);
     if (!isPasswordValid) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
     // Create JWT token
     const token = jwt.sign(
-      { userId: user._id, username: user.username, role: user.role },
+      { 
+        userId: employee._id, 
+        username: employee.username, 
+        role: employee.role,
+        userType: 'employee'
+      },
       process.env.JWT_SECRET || "your-secret-key",
-      { expiresIn: "5m" }
+      { expiresIn: "30m" }
     );
 
     res.json({
       token,
       user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
+        id: employee._id,
+        username: employee.username,
+        email: employee.email,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        role: employee.role,
+        userType: 'employee'
       },
     });
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("Employee login error:", err);
     
     // Handle MongoDB connection errors
     if (err.name === "MongoNetworkError" || err.name === "MongoServerSelectionError") {
@@ -147,6 +215,139 @@ app.post("/api/login", async (req, res) => {
     }
     
     res.status(500).json({ error: err.message || "Server error during login" });
+  }
+});
+
+// Centre Login
+app.post("/api/centre/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Find centre by username
+    const centre = await CentreLogin.findOne({ username });
+    if (!centre) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, centre.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      { 
+        userId: centre._id, 
+        username: centre.username, 
+        role: centre.role,
+        userType: 'centre'
+      },
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "30m" }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: centre._id,
+        username: centre.username,
+        email: centre.email,
+        centreName: centre.centreName,
+        centreCode: centre.centreCode,
+        role: centre.role,
+        userType: 'centre'
+      },
+    });
+  } catch (err) {
+    console.error("Centre login error:", err);
+    
+    // Handle MongoDB connection errors
+    if (err.name === "MongoNetworkError" || err.name === "MongoServerSelectionError") {
+      return res.status(500).json({ error: "Database connection error. Please try again later." });
+    }
+    
+    // Handle other MongoDB errors
+    if (err.name === "MongoError") {
+      return res.status(500).json({ error: `Database error: ${err.message}` });
+    }
+    
+    res.status(500).json({ error: err.message || "Server error during login" });
+  }
+});
+
+// Token Refresh Endpoints
+app.post("/api/employee/refresh", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+    if (decoded.userType !== 'employee') {
+      return res.status(401).json({ error: "Invalid token type" });
+    }
+
+    // Find employee
+    const employee = await EmployeeLogin.findById(decoded.userId);
+    if (!employee) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    // Create new token
+    const newToken = jwt.sign(
+      { 
+        userId: employee._id, 
+        username: employee.username, 
+        role: employee.role,
+        userType: 'employee'
+      },
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "30m" }
+    );
+
+    res.json({ token: newToken });
+  } catch (err) {
+    console.error("Token refresh error:", err);
+    res.status(401).json({ error: "Invalid token" });
+  }
+});
+
+app.post("/api/centre/refresh", async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+    if (decoded.userType !== 'centre') {
+      return res.status(401).json({ error: "Invalid token type" });
+    }
+
+    // Find centre
+    const centre = await CentreLogin.findById(decoded.userId);
+    if (!centre) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    // Create new token
+    const newToken = jwt.sign(
+      { 
+        userId: centre._id, 
+        username: centre.username, 
+        role: centre.role,
+        userType: 'centre'
+      },
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "30m" }
+    );
+
+    res.json({ token: newToken });
+  } catch (err) {
+    console.error("Token refresh error:", err);
+    res.status(401).json({ error: "Invalid token" });
   }
 });
 

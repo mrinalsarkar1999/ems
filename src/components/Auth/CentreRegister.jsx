@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
-function Register() {
+function CentreRegister() {
   const [form, setForm] = useState({
     username: '',
     email: '',
     password: '',
-    firstName: '',
-    lastName: ''
+    centreName: '',
+    centreCode: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ function Register() {
     setError('');
     setSuccess(false);
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('http://localhost:5000/api/centre/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
@@ -37,7 +37,7 @@ function Register() {
         return;
       }
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 1200);
+      setTimeout(() => navigate('/centre/login'), 1200);
     } catch (err) {
       setError('Network error');
     } finally {
@@ -48,26 +48,26 @@ function Register() {
   return (
     <div className="login-bg">
       <form className="login-form bouncy" onSubmit={handleSubmit} autoComplete="off">
-        <h2 className="login-title">Register</h2>
+        <h2 className="login-title">Centre Registration</h2>
         <div className="login-field">
-          <label htmlFor="firstName">First Name</label>
+          <label htmlFor="centreName">Centre Name</label>
           <input
-            id="firstName"
-            name="firstName"
+            id="centreName"
+            name="centreName"
             type="text"
-            value={form.firstName}
+            value={form.centreName}
             onChange={handleChange}
             required
             className="bouncy-input"
           />
         </div>
         <div className="login-field">
-          <label htmlFor="lastName">Last Name</label>
+          <label htmlFor="centreCode">Centre Code</label>
           <input
-            id="lastName"
-            name="lastName"
+            id="centreCode"
+            name="centreCode"
             type="text"
-            value={form.lastName}
+            value={form.centreCode}
             onChange={handleChange}
             required
             className="bouncy-input"
@@ -116,11 +116,15 @@ function Register() {
         </button>
         <div className="login-footer">
           <span>Already have an account?</span>
-          <Link to="/login" className="login-link">Login</Link>
+          <Link to="/centre/login" className="login-link">Centre Login</Link>
+        </div>
+        <div className="login-footer">
+          <span>Employee registration?</span>
+          <Link to="/employee/register" className="login-link">Employee Register</Link>
         </div>
       </form>
     </div>
   );
 }
 
-export default Register; 
+export default CentreRegister; 

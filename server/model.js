@@ -45,17 +45,29 @@ const EmployeeSchema = new mongoose.Schema({
   ]
 }, { timestamps: true });
 
-const UserSchema = new mongoose.Schema({
+const EmployeeLoginSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'user'], default: 'user' }
+  role: { type: String, enum: ['employee', 'admin'], default: 'employee' }
+}, { timestamps: true });
+
+const CentreLoginSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  centreName: { type: String, required: true },
+  centreCode: { type: String, required: true, unique: true },
+  role: { type: String, enum: ['centre', 'admin'], default: 'centre' }
 }, { timestamps: true });
 
 // Use employeeDB for Employee model (employeeRecords database)
 export const Employee = employeeDB.model('Employee', EmployeeSchema);
 
-// Use loginDB for User model (logins database)
-export const User = loginDB.model('User', UserSchema, 'employeeLogins');
+// Use loginDB for Employee Login model (logins database)
+export const EmployeeLogin = loginDB.model('EmployeeLogin', EmployeeLoginSchema, 'employeeLogins');
+
+// Use loginDB for Centre Login model (logins database)
+export const CentreLogin = loginDB.model('CentreLogin', CentreLoginSchema, 'centreLogins');
