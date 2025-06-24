@@ -1,0 +1,332 @@
+/* Layout */
+.attendance-container {
+  padding: 1.5rem;
+}
+
+.attendance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.attendance-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+  margin-bottom: 2rem;
+}
+
+.quick-actions-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.quick-actions-content {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Statistics Cards */
+.stats-container {
+  margin-bottom: 2rem;
+}
+
+.stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.stat-card {
+  flex: 1 1 300px;
+  min-width: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Leave Balance */
+.leave-balance {
+  margin-bottom: 2rem;
+}
+
+.leave-balance-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.leave-balance-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.leave-card {
+  flex: 1 1 300px;
+  min-width: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.leave-type {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.leave-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.leave-label {
+  color: #666;
+}
+
+/* Attendance Records */
+.attendance-records {
+  margin-bottom: 2rem;
+}
+
+.records-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.records-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.records-filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.table tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Status Chips */
+.status-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-present {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-absent {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-late {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-half-day {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.status-on-leave {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #2196F3;
+}
+
+/* Buttons */
+.button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button-primary {
+  background-color: #2196F3;
+  color: white;
+}
+
+.button-primary:hover {
+  background-color: #1976D2;
+}
+
+.button-secondary {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.button-secondary:hover {
+  background-color: #e0e0e0;
+}
+
+.button-outlined {
+  background-color: transparent;
+  border: 1px solid #2196F3;
+  color: #2196F3;
+}
+
+.button-outlined:hover {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+/* Icons */
+.icon {
+  font-size: 1.25rem;
+}
+
+/* Calendar Dialog */
+.calendar-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.calendar-content {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 90%;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.calendar-day:hover {
+  background-color: #f5f5f5;
+}
+
+.calendar-day.today {
+  background-color: #2196F3;
+  color: white;
+}
+
+.calendar-day.selected {
+  background-color: #1976D2;
+  color: white;
+}
+
+.calendar-day.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+} 
