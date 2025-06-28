@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Service Status Checker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .service {
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #ccc;
+      }
+      .service.running {
+        border-left-color: #4caf50;
+        background-color: #e8f5e9;
+      }
+      .service.error {
+        border-left-color: #f44336;
+        background-color: #ffebee;
+      }
+      .service.loading {
+        border-left-color: #ff9800;
+        background-color: #fff3e0;
+      }
+      .status {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .url {
+        color: #666;
+        font-size: 14px;
+      }
+      .error-message {
+        color: #d32f2f;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+      button {
+        background: #2196f3;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #1976d2;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Service Status Checker</h1>
+      <p>
+        This page helps you verify that all required services are running for
+        the attendance tracking system.
+      </p>
+
+      <div class="test-section">
+        <h3>📋 Required Services</h3>
+        <p>Make sure these services are running:</p>
+        <ul>
+          <li>
+            <strong>React Frontend</strong>: <code>npm start</code> (Port 3000)
+          </li>
+          <li>
+            <strong>Node.js Backend</strong>: <code>npm run server</code> (Port
+            5000)
+          </li>
+          <li>
+            <strong>Face Auth Server</strong>:
+            <code
+              >python -m uvicorn app:app --host 0.0.0.0 --port 8000
+              --reload</code
+            >
+            (Port 8000)
+          </li>
+        </ul>
+      </div>
+
+      <div id="services-status">
+        <div class="service loading" id="react-service">
+          <div class="status">Checking React Frontend...</div>
+          <div class="url">http://localhost:3000</div>
+        </div>
+
+        <div class="service loading" id="backend-service">
+          <div class="status">Checking Node.js Backend...</div>
+          <div class="url">http://localhost:5000</div>
+        </div>
+
+        <div class="service loading" id="face-auth-service">
+          <div class="status">Checking Face Auth Server...</div>
+          <div class="url">http://localhost:8000</div>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h3>🧪 Test Face Authentication</h3>
+        <p>Test the face authentication system:</p>
+        <button onclick="testFaceAuth()">Test Face Auth API</button>
+        <button onclick="testLocation()">Test Location Access</button>
+        <button onclick="testCamera()">Test Camera Access</button>
+        <div id="test-results"></div>
+      </div>
+
+      <div class="test-section">
+        <h3>🔍 Manual Checks</h3>
+        <p>If services are not running, check:</p>
+        <ul>
+          <li>
+            Are all terminal windows open and running the correct commands?
+          </li>
+          <li>Are there any error messages in the terminal?</li>
+          <li>Are the correct ports (3000, 5000, 8000) available?</li>
+          <li>Is MongoDB running and accessible?</li>
+          <li>Are AWS credentials configured in .env file?</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // Check service status
+      async function checkService(url, serviceId, serviceName) {
+        try {
+          const response = await fetch(url, {
+            method: "GET",
+            mode: "no-cors", // This will work for CORS issues
+          });
+          updateServiceStatus(
+            serviceId,
+            "running",
+            `${serviceName} is running`
+          );
+        } catch (error) {
+          updateServiceStatus(
+            serviceId,
+            "error",
+            `${serviceName} is not running`,
+            error.message
+          );
+        }
+      }
+
+      function updateServiceStatus(serviceId, status, message, error = "") {
+        const element = document.getElementById(serviceId);
+        element.className = `service ${status}`;
+        element.innerHTML = `
+                <div class="status">${message}</div>
+                <div class="url">http://localhost:${
+                  serviceId.includes("react")
+                    ? "3000"
+                    : serviceId.includes("backend")
+                    ? "5000"
+                    : "8000"
+                }</div>
+                ${
+                  error
+                    ? `<div class="error-message">Error: ${error}</div>`
+                    : ""
+                }
+            `;
+      }
+
+      // Test face authentication
+      async function testFaceAuth() {
+        const resultsDiv = document.getElementById("test-results");
+        resultsDiv.innerHTML = "<p>Testing face authentication...</p>";
+
+        try {
+          const response = await fetch("http://localhost:8000/health");
+          if (response.ok) {
+            const data = await response.json();
+            resultsDiv.innerHTML = `<p style="color: green;">✅ Face Auth Server: ${data.message}</p>`;
+          } else {
+            resultsDiv.innerHTML = `<p style="color: red;">❌ Face Auth Server: HTTP ${response.status}</p>`;
+          }
+        } catch (error) {
+          resultsDiv.innerHTML = `<p style="color: red;">❌ Face Auth Server: ${error.message}</p>`;
+        }
+      }
+
+      // Test location access
+      function testLocation() {
+        const resultsDiv = document.getElementById("test-results");
+        resultsDiv.innerHTML = "<p>Testing location access...</p>";
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              resultsDiv.innerHTML = `
+                            <p style="color: green;">✅ Location Access: Available</p>
+                            <p>Latitude: ${position.coords.latitude}</p>
+                            <p>Longitude: ${position.coords.longitude}</p>
+                        `;
+            },
+            (error) => {
+              resultsDiv.innerHTML = `<p style="color: red;">❌ Location Access: ${error.message}</p>`;
+            }
+          );
+        } else {
+          resultsDiv.innerHTML =
+            '<p style="color: red;">❌ Location Access: Not supported</p>';
+        }
+      }
+
+      // Test camera access
+      async function testCamera() {
+        const resultsDiv = document.getElementById("test-results");
+        resultsDiv.innerHTML = "<p>Testing camera access...</p>";
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          stream.getTracks().forEach((track) => track.stop());
+          resultsDiv.innerHTML =
+            '<p style="color: green;">✅ Camera Access: Available</p>';
+        } catch (error) {
+          resultsDiv.innerHTML = `<p style="color: red;">❌ Camera Access: ${error.message}</p>`;
+        }
+      }
+
+      // Check all services on page load
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          checkService(
+            "http://localhost:3000",
+            "react-service",
+            "React Frontend"
+          );
+        }, 1000);
+
+        setTimeout(() => {
+          checkService(
+            "http://localhost:5000",
+            "backend-service",
+            "Node.js Backend"
+          );
+        }, 2000);
+
+        setTimeout(() => {
+          checkService(
+            "http://localhost:8000",
+            "face-auth-service",
+            "Face Auth Server"
+          );
+        }, 3000);
+      });
+    </script>
+  </body>
+</html>
